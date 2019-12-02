@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="/tailwindcss/tailwind.min.css">
+  <style>
+    #errors {
+      display: none;
+    }
+
+    #success {
+      display: none;
+    }
+  </style>
+  <title>Register</title>
+</head>
+
+<body class="bg-gray-200 p-10">
+  <form class="w-1/3 bg-white shadow rounded-sm p-10 mx-auto text-center">
+    <span id="success" class="block w-full bg-green-400 text-green-900 px-2 py-1 rounded-sm mb-5">
+      <ul>
+      </ul>
+    </span>
+    <span id="errors" class="block w-full bg-red-400 text-red-900 px-2 py-1 rounded-sm mb-5">
+      <ul>
+      </ul>
+    </span>
+    <h1 class="font-bold text-2xl mb-5">Register</h1>
+    <input placeholder="Email" class="w-full bg-gray-200 px-2 py-1 rounded-sm mb-3" type="email" name="email">
+    <input placeholder="Password" class="w-full bg-gray-200 px-2 py-1 rounded-sm mb-3" type="password" name="password">
+    <input placeholder="Password Confirmation" class="w-full bg-gray-200 px-2 py-1 rounded-sm mb-3" type="password"
+      name="password_confirmation">
+    <input type="submit" value="register" class="bg-blue-400 w-full rounded-sm px-2 py-1 shadow-lg text-white">
+  </form>
+
+  <script src="/axios/axios.min.js"></script>
+  <script>
+    const form = document.querySelector('form')
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.querySelector('input[name=email]').value
+      const password = document.querySelector('input[name=password]').value
+      const password_confirmation = document.querySelector('input[name=password_confirmation]').value
+      const user = {
+        email, password, password_confirmation
+      }
+      axios.post('/api/v1/auth/register', user).then(({ data, status }) => {
+        if (status === 201)
+          window.location.href = '/auth/confirm'
+        else
+          alert('Somthing went wrong! try again.')
+      }).catch(({ response }) => {
+        // typeof array is object
+        if (typeof response.data.errors === "object" && response.data.errors[0]) {
+          // show error block
+          document.querySelector('#errors').style.display = 'block';
+          const ulContainer = document.querySelector('#errors ul')
+          // insert error text
+          generateMessage(ulContainer, response.data.errors)
+          // hide errors
+          setTimeout(() => {
+            document.querySelector('#errors ul').innerHTML = ''
+            document.querySelector('#errors').style.display = 'none';
+          }, 3000);
+        } else {
+          alert('Somthing went wrong! try again.')
+          console.error('Unexpected Error =>', response.data)
+        }
+      })
+    })
+
+    function generateMessage(ulContainer, array) {
+      array.forEach(item => {
+        const li = document.createElement('li')
+        li.textContent = item.msg
+        ulContainer.appendChild(li)
+      })
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+{
+  "email": "support@sindibad.com",
+  "jwt_token": {
+    "secret": "example",
+    "loginExpiresIn": "30 days",
+    "emailConfirmationExpiresIn": "10h"
+  },
+  "bcrypt_saltRounds": 10,
+  "mysql_db": "testapi",
+  "mysql_user": "root",
+  "mysql_password": "hola",
+  "mail_config": {
+    "host": "smtp.mailtrap.io",
+    "port": 587,
+    "secure": false,
+    "auth": {
+      "user": "66adb6371e5304",
+      "pass": "cacd8471ae17ba"
+    }
+  },
+  "website": {
+    "name": "Sindibad",
+    "domain": "http://localhost:3000"
+  }
+}
