@@ -1,5 +1,6 @@
 const { check } = require('express-validator');
 const UserModel = require('../../model/UserModel')
+const bcrypt = require('bcrypt')
 
 module.exports = {
   RegisterValidation: [
@@ -28,6 +29,13 @@ module.exports = {
         }
       }).then(async (user) => {
         const match = await bcrypt.compare(password, user.password);
+        if (user.status === 0) {
+          return res.status(403).json({
+            errors: [
+              { msg: `This email is not confirmed.` }
+            ]
+          })
+        }
         if (match) {
           req.user = UserModel.pickUserInfo(user)
           return next()

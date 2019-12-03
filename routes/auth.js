@@ -1,6 +1,8 @@
-
 var express = require('express');
 var router = express.Router();
+const jwt = require('jsonwebtoken')
+const config = require('config')
+const UserModel = require('../model/UserModel')
 
 router.get('/register', function (req, res, next) {
   res.render('register')
@@ -10,10 +12,11 @@ router.get('/confirm', function (req, res, next) {
   res.render('confirmEmail')
 })
 
-router.put('/confirm/email', function (req, res) {
+router.get('/confirm/email', function (req, res) {
   let confirmationToken = req.query.token
   if (!confirmationToken) {
-    return res.status(400).json({
+    return res.render('confirmEmail', {
+      success: false,
       errors: [
         {
           msg: 'token query is required. /confirm/email?token=yourToken',
@@ -23,14 +26,16 @@ router.put('/confirm/email', function (req, res) {
   }
   jwt.verify(confirmationToken, config.get('jwt_token.secret'), (err, decodedEmail) => {
     if (err && err.name === "TokenExpiredError") {
-      return res.status(400).send({
+      return res.render('confirmEmail', {
+        success: false,
         errors: [
           { msg: 'Expired, try to resend a new confirmation email.' }
         ]
       })
 
     } else if (err) {
-      return res.status(400).send({
+      return res.render('confirmEmail', {
+        success: false,
         errors: [
           { msg: 'Not working, try to resend a new confirmation email.' }
         ]
@@ -46,7 +51,8 @@ router.put('/confirm/email', function (req, res) {
           // Check if record exists in db
           if (user) {
             user.update({
-              status: 'confirmedEmail'
+              // 1 => email confirmed
+              status: 1
             })
               .then((updatedUser) => {
                 const user = updatedUser.get({
@@ -58,7 +64,8 @@ router.put('/confirm/email', function (req, res) {
                   (err, token) => {
                     if (err) throw err;
                     else {
-                      return res.status(201).send({
+                      return res.render('confirmEmail', {
+                        errors: false,
                         success: [
                           {
                             msg: 'Email confirmed successfully.',
@@ -73,7 +80,8 @@ router.put('/confirm/email', function (req, res) {
                   })
               })
           } else {
-            return res.status(400).send({
+            return res.render('confirmEmail', {
+              success: false,
               errors: [
                 { msg: `This token doesn't belong to any user.` }
               ]

@@ -32,17 +32,22 @@ router.post('/register', RegisterValidation, function (req, res, next) {
 })
 
 router.post('/login', LoginValidation, function (req, res) {
-  jwt.sign(req.user, config.get('jwt_token.secret'), (err, token) => {
-    if (err) {
-      throw err;
-    } else {
-      return res.status(200).json({
-        success: [
-          { msg: 'logged successfully', token }
-        ]
-      })
-    }
-  })
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.json({ errors: errors.array() })
+  } else {
+    jwt.sign(req.user, config.get('jwt_token.secret'), (err, token) => {
+      if (err) {
+        throw err;
+      } else {
+        return res.status(200).json({
+          success: [
+            { msg: 'logged successfully', token }
+          ]
+        })
+      }
+    })
+  }
 })
 
 module.exports = router;
